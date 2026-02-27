@@ -19,7 +19,7 @@
     </head>
 <body data-chid="1" data-operate="0" data-bigclassid="0" data-type="0" data-hyid="0" id="webBody" data-copyid="0" data-copyuserid="2316115">
 
-<div class="wrapper wrapper-1500" id="wrapper" style="zoom:0.9;">
+<div class="wrapper wrapper-1500" id="wrapper" style="transform:scale(0.9); transform-origin:center top;">
     
 <script type="text/javascript">
     var moduleConfig = {};
@@ -229,7 +229,7 @@
         
         
         <div class="customModuleRowInner">
-            <div class="CModulePA" style="height:780px;">
+            <div class="CModulePA" style="height:685px;">
                     <div id="evMo_WSKkN" class="ev-module-edit" data-big="1" data-small="1" data-threetype="0" style="width:1500px; height:115px; left:0px; top:72px; z-index:1;">
         <div class="ev-module-text ev-module-edit-box" id="Mo_WSKkN">
            <h1 style="text-align:center;font-family:΢���ź�;" class="ev-text-title-1"><span style="color: rgb(255, 255, 255); font-size: 48px; font-family: Arial; line-height: 1.2; font-weight: 300;">The trusted solution for issuing verifiable<br>documents to the blockchain</span></h1>
@@ -397,38 +397,33 @@
 
 </div>
 
-<!-- Sticky Floating Title Bar -->
-<div id="stickyTitleBar" style="display:none; position:fixed; top:0; left:0; width:100%; z-index:99998; background:rgba(50,50,55,0.95); border-bottom:1px solid rgba(255,255,255,0.1); padding:12px 0; text-align:center; transition:all 0.3s ease; backdrop-filter:blur(10px);">
-    <span style="color:#fff; font-size:20px; font-family:Arial,sans-serif; font-weight:300; letter-spacing:0.5px;">The trusted solution for issuing verifiable documents to the blockchain</span>
+<!-- Sticky Floating Header Bar -->
+<div id="stickyTitleBar" style="display:none; position:fixed; top:0; left:0; width:100%; z-index:99998; background:rgba(50,50,55,0.97); border-bottom:1px solid rgba(255,255,255,0.1); padding:8px 0; text-align:center; backdrop-filter:blur(10px);">
+    <div style="font-size:14px; font-family:Arial,sans-serif; font-weight:bold; color:#fff; letter-spacing:1px;">SILVERLAKE</div>
+    <div style="font-size:12px; font-family:Arial,sans-serif; color:rgba(255,255,255,0.8); margin-top:2px;">iSmartCert Verification Portal</div>
 </div>
 
 <script type="text/javascript">
 (function(){
     var stickyBar = document.getElementById('stickyTitleBar');
-    var titleRow = document.getElementById('row_66');
-    var lastScrollY = 0;
     var isSticky = false;
 
     function checkSticky() {
         var scrollY = window.pageYOffset || document.documentElement.scrollTop;
-        if (titleRow) {
-            var rect = titleRow.getBoundingClientRect();
-            // When the title row scrolls above the viewport
-            if (rect.top < -50 && scrollY > 200) {
-                if (!isSticky) {
-                    stickyBar.style.display = 'block';
-                    setTimeout(function(){ stickyBar.style.opacity = '1'; }, 10);
-                    isSticky = true;
-                }
-            } else {
-                if (isSticky) {
-                    stickyBar.style.display = 'none';
-                    stickyBar.style.opacity = '0';
-                    isSticky = false;
-                }
+        // Show sticky header when user scrolls down past 100px
+        if (scrollY > 100) {
+            if (!isSticky) {
+                stickyBar.style.display = 'block';
+                setTimeout(function(){ stickyBar.style.opacity = '1'; }, 10);
+                isSticky = true;
+            }
+        } else {
+            if (isSticky) {
+                stickyBar.style.opacity = '0';
+                setTimeout(function(){ stickyBar.style.display = 'none'; }, 300);
+                isSticky = false;
             }
         }
-        lastScrollY = scrollY;
     }
 
     window.addEventListener('scroll', checkSticky);
