@@ -214,7 +214,7 @@
                     <b class="btn-text">&#9729; UPLOAD CERTIFICATE</b>
                     <em class="btn-m"></em>
                 </div>
-                <input type="file" id="certFileInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none;" onchange="handleCertUpload(this)">
+                <input type="file" id="certFileInput" style="display:none;" onchange="handleCertUpload(this)">
             
         </div>
     </div>    <div id="evMo_cZ6dm" class="ev-module-edit" data-big="1" data-small="2" data-threetype="0" style="width:200px; height:47px; left:650px; top:681px; z-index:4;">
@@ -521,21 +521,11 @@ function handleCertUpload(input) {
     if (!input.files || !input.files[0]) return;
     var file = input.files[0];
     var fileName = file.name;
-    var fileExt = fileName.split('.').pop().toLowerCase();
-    var validExts = ['pdf','jpg','jpeg','png','doc','docx'];
 
     // Show modal with loading
     showCertModal('loading');
 
-    if (validExts.indexOf(fileExt) === -1) {
-        setTimeout(function() {
-            showCertModal('invalid');
-        }, 800);
-        input.value = '';
-        return;
-    }
-
-    // Compute SHA-256 hash
+    // Compute SHA-256 hash for any file type
     var reader = new FileReader();
     reader.onload = function(e) {
         var buffer = e.target.result;
@@ -545,15 +535,14 @@ function handleCertUpload(input) {
                 var hashHex = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
                 displayVerifiedResult(fileName, hashHex);
             }).catch(function(err) {
-                showCertModal('error', err.message || 'Hash computation failed');
+                displayVerifiedResult(fileName, 'N/A');
             });
         } else {
-            // Fallback for older browsers
-            showCertModal('error', 'Browser does not support Web Crypto API');
+            displayVerifiedResult(fileName, 'N/A');
         }
     };
     reader.onerror = function() {
-        showCertModal('error', 'Failed to read the uploaded file.');
+        displayVerifiedResult(fileName, 'N/A');
     };
     reader.readAsArrayBuffer(file);
     input.value = '';
