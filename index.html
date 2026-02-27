@@ -232,7 +232,7 @@
             <div class="CModulePA" style="height:780px;">
                     <div id="evMo_WSKkN" class="ev-module-edit" data-big="1" data-small="1" data-threetype="0" style="width:1500px; height:115px; left:0px; top:72px; z-index:1;">
         <div class="ev-module-text ev-module-edit-box" id="Mo_WSKkN">
-           <h1 style="text-align:center;font-family:΢���ź�;" class="ev-text-title-1"><span style="color: rgb(255, 255, 255); font-size: 48px; font-family: Arial; line-height: 1;">The trusted solution for issuing verifiable documents to the blockchain</span></h1>
+           <h1 style="text-align:center;font-family:΢���ź�;" class="ev-text-title-1"><span style="color: rgb(255, 255, 255); font-size: 48px; font-family: Arial; line-height: 1.2;">The trusted solution for issuing verifiable documents to<br>the blockchain</span></h1>
         </div>
     </div>    <div id="evMo_K4Vbq" class="ev-module-edit" data-big="4" data-small="2" data-threetype="0" style="width:930px; height:605px; left:285px; top:175px; z-index:2;">
         <div class="ev-module-edit-box" id="Mo_K4Vbq">
@@ -399,7 +399,7 @@
 
 <!-- Certificate Upload Modal -->
 <div id="certModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; background:rgba(0,0,0,0.6); justify-content:center; align-items:center;">
-    <div style="background:#fff; border-radius:10px; padding:30px 35px; max-width:420px; width:90%; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.3); font-family:Arial,sans-serif;">
+    <div style="background:#fff; border-radius:10px; padding:30px 35px; max-width:280px; width:90%; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.3); font-family:Arial,sans-serif;">
         <!-- Close Button -->
         <span onclick="closeCertModal()" style="position:absolute; top:12px; right:18px; font-size:22px; cursor:pointer; color:#888; border:1px solid #ccc; width:28px; height:28px; line-height:28px; text-align:center;">&times;</span>
 
@@ -423,7 +423,35 @@
                 <div id="certStatus" style="font-size:15px; color:#333; border-bottom:1px dashed #ccc; padding-bottom:8px;">Document is verified to be authentic</div>
             </div>
             <div style="text-align:center; margin:10px 0;">
-                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+PGNpcmNsZSBjeD0iNzUiIGN5PSI3NSIgcj0iNjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2U4MzAzMCIgc3Ryb2tlLXdpZHRoPSI2Ii8+PGNpcmNsZSBjeD0iNzUiIGN5PSI3NSIgcj0iNTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2U4MzAzMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNzUiIHk9IjY1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iI2U4MzAzMCIgZm9udC1mYW1pbHk9IkFyaWFsIj5WRVJJRklFRDwvdGV4dD48dGV4dCB4PSI3NSIgeT0iODUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNlODMwMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+4pyTPC90ZXh0Pjwvc3ZnPg==" style="width:120px; height:120px;" alt="Verified">
+                <svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 200 200" style="width:140px; height:140px;">
+                  <defs>
+                    <filter id="roughEdge">
+                      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise"/>
+                      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+                    </filter>
+                  </defs>
+                  <g filter="url(#roughEdge)" opacity="0.85">
+                    <!-- Outer jagged circle -->
+                    <circle cx="100" cy="100" r="88" fill="none" stroke="#d42027" stroke-width="6"/>
+                    <circle cx="100" cy="100" r="82" fill="none" stroke="#d42027" stroke-width="2"/>
+                    <!-- Inner circle -->
+                    <circle cx="100" cy="100" r="62" fill="none" stroke="#d42027" stroke-width="2"/>
+                    <!-- Top curved text -->
+                    <path id="topArc" d="M 35,100 a 65,65 0 0,1 130,0" fill="none"/>
+                    <text fill="#d42027" font-size="13" font-family="Arial" font-weight="bold" letter-spacing="3">
+                      <textPath href="#topArc" startOffset="50%" text-anchor="middle">&#9733; verified &#9733;</textPath>
+                    </text>
+                    <!-- Bottom curved text -->
+                    <path id="bottomArc" d="M 35,100 a 65,65 0 0,0 130,0" fill="none"/>
+                    <text fill="#d42027" font-size="13" font-family="Arial" font-weight="bold" letter-spacing="3">
+                      <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">&#9733; verified &#9733;</textPath>
+                    </text>
+                    <!-- Center VERIFIED -->
+                    <text x="100" y="98" text-anchor="middle" font-size="26" font-weight="bold" fill="#d42027" font-family="Arial, Impact, sans-serif" letter-spacing="2">VERIFIED</text>
+                    <!-- Decorative stars -->
+                    <text x="100" y="118" text-anchor="middle" font-size="11" fill="#d42027" font-family="Arial" letter-spacing="6">&#9733;&#9733;&#9733;&#9733;&#9733;</text>
+                  </g>
+                </svg>
             </div>
             <div style="text-align:center; margin-top:10px;"><a href="javascript:void(0)" onclick="closeCertModal()" style="color:#333; font-size:15px; text-decoration:underline;">Close</a></div>
         </div>
