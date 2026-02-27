@@ -19,7 +19,7 @@
     </head>
 <body data-chid="1" data-operate="0" data-bigclassid="0" data-type="0" data-hyid="0" id="webBody" data-copyid="0" data-copyuserid="2316115">
 
-<div class="wrapper wrapper-1500" id="wrapper">
+<div class="wrapper wrapper-1500" id="wrapper" style="zoom:0.9;">
     
 <script type="text/javascript">
     var moduleConfig = {};
@@ -234,18 +234,18 @@
         <div class="ev-module-text ev-module-edit-box" id="Mo_WSKkN">
            <h1 style="text-align:center;font-family:΢���ź�;" class="ev-text-title-1"><span style="color: rgb(255, 255, 255); font-size: 48px; font-family: Arial; line-height: 1.2; font-weight: 300;">The trusted solution for issuing verifiable<br>documents to the blockchain</span></h1>
         </div>
-    </div>    <div id="evMo_K4Vbq" class="ev-module-edit" data-big="4" data-small="2" data-threetype="0" style="width:930px; height:605px; left:285px; top:225px; z-index:2;">
+    </div>    <div id="evMo_K4Vbq" class="ev-module-edit" data-big="4" data-small="2" data-threetype="0" style="width:698px; height:454px; left:401px; top:225px; z-index:2;">
         <div class="ev-module-edit-box" id="Mo_K4Vbq">
             
                 <div class="ev-base-shape ev-base-shape-2"></div>
                 
             
         </div>
-    </div>    <div id="evMo_BJUTg" class="ev-module-edit" data-big="2" data-small="1" data-threetype="0" style="width:923px; height:577px; left:289px; top:241px; z-index:3;">
+    </div>    <div id="evMo_BJUTg" class="ev-module-edit" data-big="2" data-small="1" data-threetype="0" style="width:692px; height:433px; left:404px; top:241px; z-index:3;">
         <div class="ev-module-edit-box " id="Mo_BJUTg">
             
                 <div class="ev-pic ev-pic-1 ">
-                    <img src="" class="default-img lazy-loading" data-original-src="https://aimg8.dlssyht.cn/u/2320384/module/simplepicbackground/11634/23267140_1771998863.jpg?x-oss-process=image/resize,m_fixed,w_923,h_577,limit_0">
+                    <img src="" class="default-img lazy-loading" data-original-src="https://aimg8.dlssyht.cn/u/2320384/module/simplepicbackground/11634/23267140_1771998863.jpg?x-oss-process=image/resize,m_fixed,w_692,h_433,limit_0">
                     
                 </div>
             
@@ -396,6 +396,46 @@
 
 
 </div>
+
+<!-- Sticky Floating Title Bar -->
+<div id="stickyTitleBar" style="display:none; position:fixed; top:0; left:0; width:100%; z-index:99998; background:rgba(50,50,55,0.95); border-bottom:1px solid rgba(255,255,255,0.1); padding:12px 0; text-align:center; transition:all 0.3s ease; backdrop-filter:blur(10px);">
+    <span style="color:#fff; font-size:20px; font-family:Arial,sans-serif; font-weight:300; letter-spacing:0.5px;">The trusted solution for issuing verifiable documents to the blockchain</span>
+</div>
+
+<script type="text/javascript">
+(function(){
+    var stickyBar = document.getElementById('stickyTitleBar');
+    var titleRow = document.getElementById('row_66');
+    var lastScrollY = 0;
+    var isSticky = false;
+
+    function checkSticky() {
+        var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+        if (titleRow) {
+            var rect = titleRow.getBoundingClientRect();
+            // When the title row scrolls above the viewport
+            if (rect.top < -50 && scrollY > 200) {
+                if (!isSticky) {
+                    stickyBar.style.display = 'block';
+                    setTimeout(function(){ stickyBar.style.opacity = '1'; }, 10);
+                    isSticky = true;
+                }
+            } else {
+                if (isSticky) {
+                    stickyBar.style.display = 'none';
+                    stickyBar.style.opacity = '0';
+                    isSticky = false;
+                }
+            }
+        }
+        lastScrollY = scrollY;
+    }
+
+    window.addEventListener('scroll', checkSticky);
+    stickyBar.style.opacity = '0';
+    stickyBar.style.transition = 'opacity 0.3s ease';
+})();
+</script>
 
 <!-- Certificate Upload Modal -->
 <div id="certModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; background:rgba(0,0,0,0.6); justify-content:center; align-items:center;">
