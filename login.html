@@ -2,8 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta name="renderer" content="webkit">
-<meta http-equiv="Content-Type" content="text/html;charset=gbk">
-<title>µÇÂ¼¹ÜÀíºóÌ¨</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>ç™»å½•ç®¡ç†åå°</title>
 <link href="static/css/index.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="static/css/bg.css" type="text/css">
 <script type="text/javascript" src="static/js/jQ.js"></script>
@@ -16,34 +16,32 @@
 <body style="overflow: hidden">
 <div class="frame_register">
     <div class="main_register">
-                    <div class="blue-gradient-bg"><!--<img width="100%" src="http://aimg8.dlszywz.com/login_background/pic/1/166_7082201492677378.jpg" />--><div class="grid-pattern"></div></div>
+                    <div class="blue-gradient-bg"><div class="grid-pattern"></div></div>
             <div class="canvas_bg" id="canvasBg"></div>
         
-        <!-----×¢²áÒ³Ãæ---->
         <div class="logo_window">
             <div class="logo">
                             </div>
             <div class="logo_window1">
-                <form name="userLoginActionForm" id="userLoginActionForm" method="POST" action="/login.php?t=1772023434" target="_parent">
+                <form name="userLoginActionForm" id="userLoginActionForm" method="POST" action="#" onsubmit="return logincheck()">
                 <div class="logo_window_L" style="margin: 0 auto;float: inherit;">
-                    <span class="logo-form-title">ÓÃ»§µÇÂ¼</span>
+                    <span class="logo-form-title">ç”¨æˆ·ç™»å½•</span>
                      <div class="register_form2">
-                        <input class="user-name" id="username" name="username" type="text" value="ÓÃ»§Ãû" maxlength="20" onfocus="userInter('F','username',this);" onblur="userInter('B','username',this)">
-                        <label class="z-admin" id="manager_login"><input type="checkbox" name="is_manager" value="1"> ×Ó¹ÜÀíÔ±µÇÂ¼ </label>
+                        <input class="user-name" id="username" name="username" type="text" placeholder="ç”¨æˆ·å" maxlength="20">
+                        <label class="z-admin" id="manager_login"><input type="checkbox" name="is_manager" value="1"> ä»ç®¡ç†å‘˜ç™»å½• </label>
                     </div>
                     <div class="register_form2" style="position:relative;height:50px">
-                        <input class="user-pass" type="text" id="p_t" name="p_t" value="ÃÜÂë" onfocus="hide_pw()" style="z-index:2;position:absolute;">
-                        <input class="user-pass" type="password" autocomplete="off" id="userpwd" name="userpwd" maxlength="32" onblur="check_pw();" style="z-index:1;position:absolute;">
+                        <input class="user-pass" type="password" autocomplete="off" id="userpwd" name="userpwd" placeholder="å¯†ç " maxlength="32" style="position:absolute; z-index:2;">
                     </div>
                     <div class="register_form3">
-                        <input id="validatecode" name="validatecode" type="text" placeholder="ÑéÖ¤Âë" maxlength="6" onfocus="check_yzm(1)" onblur="check_yzm(2);">
-                        <a href="javaScript:getVcode2()" title="µã»÷£¬»»Ò»ÕÅ£¡"><img src="static/picture/captcha.jpg" id="vcodesrc" name="vcodesrc" border="0" width="100" height="40" alt="µã»÷£¬»»Ò»ÕÅ£¡"></a>
+                        <input id="validatecode" name="validatecode" type="text" placeholder="éªŒè¯ç " maxlength="6">
+                        <a href="javascript:void(0)" onclick="refreshCaptcha()" title="ç‚¹å‡»æ¢ä¸€å¼ "><img src="static/picture/captcha.jpg" id="vcodesrc" name="vcodesrc" border="0" width="100" height="40" alt="ç‚¹å‡»æ¢ä¸€å¼ "></a>
                     </div>
                     <div class="no_pwd">
-                        <a href="get_password_new.html" target="_blank">Íü¼ÇÃÜÂë£¿</a>
+                        <a href="get_password_new.html" target="_blank">å¿˜è®°å¯†ç ï¼Ÿ</a>
                     </div>
                     <div class="button_a">
-                        <a href="###" class="login-btn" style="margin: 0 auto;display: block;" id="login_bt" name="login_bt" onclick="logincheck()">µÇÂ¼</a>
+                        <a href="javascript:void(0)" class="login-btn" style="margin: 0 auto;display: block;" id="login_bt" name="login_bt" onclick="logincheck()">ç™»å½•</a>
                     </div>
                 </div> 
                     <input type="hidden" id="is_cs" name="is_cs" value="0">
@@ -67,49 +65,35 @@
                 lineColor: '#f0f0f0'
             });
         }
-        $("#userLoginActionForm").submit(function () {
-            var sign = false;
-            $.ajax({
-                type: "POST",
-                url: "./check_login.php",
-                data: {
-                    username: $('input[name=username]').val(),
-                    is_manager: $("#manager_login input[type=checkbox]").prop("checked") ? 1 : 0,
-                    userpwd: $('input[name=userpwd]').val(),
-                    validatecode: $('input[name=validatecode]').val()
-                },
-                dataType: "json",
-                async: false,
-                error: function () {},
-                success: function (data) {
-                    if (!parseInt(data.error)) {
-                        sign = true;
-                    } else {
-                        sign = false;
-                        if (typeof data.message != "undefined" && data.message) {
-                            alert(data.message)
-                        }
-                    }
-                }
-            });
-            if (!sign) {
-                return false;
-            }
-        });
     });
-    var loginerr='';
-    if(loginerr=="error"){
-        alert("ÓÃ»§»òÃÜÂë´íÎó£¬ÇëÖØĞÂµÇÂ½£¡´íÎó1´Î£¬³¬¹ı5´Îµ±Ìì½«²»ÄÜÔÙµÇÂ¼£¡");
-        // window.location.href = history.go(-1);
-    }else if(loginerr=='validateerr'){
-        alert("ÑéÖ¤ÂëÊäÈë´íÎó!");
-        // window.location.href = history.go(-1);
-    }else if(loginerr=='usererror'){
-        alert("ÄúµÄÕË»§ÒÑ±»¶³½á!");
-        // window.location.href = history.go(-1);
-    }else if(loginerr=='error_num'){
-	  alert("ÄúµÄÕË»§µÄÃÜÂëÊäÈë´íÎóÒÑ³¬¹ı5´Î£¬ÕËºÅ½ñÌì½«ÔİÊ±¶³½á!");
-	}
-  </script>
+
+    function refreshCaptcha() {
+        var img = document.getElementById('vcodesrc');
+        img.src = 'static/picture/captcha.jpg?t=' + Math.random();
+    }
+
+    function logincheck() {
+        var username = document.getElementById('username').value;
+        var userpwd = document.getElementById('userpwd').value;
+        var validatecode = document.getElementById('validatecode').value;
+
+        if (!username || username === '') {
+            alert('è¯·è¾“å…¥ç”¨æˆ·å');
+            return false;
+        }
+        if (!userpwd || userpwd === '') {
+            alert('è¯·è¾“å…¥å¯†ç ');
+            return false;
+        }
+        if (!validatecode || validatecode === '') {
+            alert('è¯·è¾“å…¥éªŒè¯ç ');
+            return false;
+        }
+
+        // Submit form
+        alert('ç™»å½•åŠŸèƒ½éœ€è¦åç«¯æœåŠ¡æ”¯æŒï¼Œå½“å‰ä¸ºé™æ€å±•ç¤ºé¡µé¢ã€‚');
+        return false;
+    }
+</script>
 </body>
-</html>
+</html>
