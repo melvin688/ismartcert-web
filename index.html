@@ -108,6 +108,22 @@
 <link type="text/css" rel="stylesheet" href="static/css/webskin.css" id="webSkinCss">
 <link type="text/css" rel="stylesheet" href="static/css/base_module_style.min.css">
             <link type="text/css" rel="stylesheet" href="static/css/TJStyle.css">
+    <style type="text/css">
+    /* === Layout Fix: center content and prevent overflow === */
+    html, body { overflow-x: hidden; }
+    .wrapper { max-width: 100vw; overflow-x: hidden; }
+    /* Center 1500px inner container within 100%-width rows */
+    .customModuleRowFullX > .customModuleRowInner,
+    #row_16 > .customModuleRowInner,
+    .headPublicModuleRow > .customModuleRowInner {
+        margin: 0 auto;
+    }
+    /* Ensure CModulePA does not exceed container */
+    .CModulePA { max-width: 1500px; margin: 0 auto; }
+    /* Fix head row positioning to be centered */
+    .headPublicModuleRow { width: 100% !important; }
+    .headPublicModuleRow > .customModuleRowInner { width: 1500px; margin: 0 auto; }
+    </style>
         <script type="text/javascript" src="static/js/base64.min.js"></script>
     <script type="text/javascript" src="static/js/json2.js"></script>
         <script id="languages_jquery_validationEngine_js" type="text/javascript" src="static/js/jquery.validationEngine-zh_CN.js"></script>
