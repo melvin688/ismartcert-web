@@ -140,7 +140,7 @@
         <div class="ev-module-edit-box " id="Mo_37VXk">
             <a href="" target="_blank">
                 <div class="ev-pic ev-pic-1 ">
-                    <img src="" class="default-img lazy-loading" data-original-src="https://aimg8.dlssyht.cn/u/2320384/module/simplepicbackground/11628/23254972_1771723018.PNG?x-oss-process=image/resize,m_fixed,w_200,h_38,limit_0">
+                    <img src="https://aimg8.dlssyht.cn/u/2320384/module/simplepicbackground/11628/23254972_1771723018.PNG?x-oss-process=image/resize,m_fixed,w_200,h_38,limit_0" class="default-img" data-original-src="https://aimg8.dlssyht.cn/u/2320384/module/simplepicbackground/11628/23254972_1771723018.PNG?x-oss-process=image/resize,m_fixed,w_200,h_38,limit_0">
                     
                 </div>
             </a>
@@ -261,7 +261,7 @@
         <div class="ev-module-edit-box " id="Mo_BJUTg">
             
                 <div class="ev-pic ev-pic-1 ">
-                    <img src="" class="default-img lazy-loading" data-original-src="https://aimg8.dlssyht.cn/u/2320384/module/simplepicbackground/11634/23267140_1771998863.jpg?x-oss-process=image/resize,m_fixed,w_692,h_433,limit_0">
+                    <img src="https://aimg8.dlssyht.cn/u/2320384/module/simplepicbackground/11634/23267140_1771998863.jpg?x-oss-process=image/resize,m_fixed,w_692,h_433,limit_0" class="default-img" data-original-src="https://aimg8.dlssyht.cn/u/2320384/module/simplepicbackground/11634/23267140_1771998863.jpg?x-oss-process=image/resize,m_fixed,w_692,h_433,limit_0">
                     
                 </div>
             
@@ -295,6 +295,13 @@
     <script type="text/javascript">
     $("body").attr('id','webBody');
     wsf.fullRow.countMoPosition();
+    // Force load any remaining lazy-loading images
+    $(function(){
+        $('img.lazy-loading').each(function(){
+            var src = $(this).attr('data-original-src');
+            if(src) $(this).attr('src', src).removeClass('lazy-loading');
+        });
+    });
 </script>
 
             
