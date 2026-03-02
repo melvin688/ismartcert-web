@@ -1,0 +1,5 @@
+fastapi==0.115.*
+uvicorn[standard]==0.34.*
+python-multipart==0.0.*
+PyMuPDF==1.25.*
+google-genai==1.5.*

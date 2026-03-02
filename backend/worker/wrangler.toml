@@ -1,0 +1,6 @@
+name = "diploma-classifier"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+
+# GEMINI_API_KEY is stored as a secret via `wrangler secret put GEMINI_API_KEY`
+# Do NOT put the key here.
