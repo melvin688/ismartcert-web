@@ -120,7 +120,7 @@ async function handleClassify(request, env) {
     const base64Pdf = arrayBufferToBase64(pdfBuffer);
 
     const geminiUrl =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent" +
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent" +
       `?key=${env.GEMINI_API_KEY}`;
 
     const geminiRes = await fetch(geminiUrl, {
