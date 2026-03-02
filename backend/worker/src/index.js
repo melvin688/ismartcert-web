@@ -120,7 +120,7 @@ async function handleClassify(request, env) {
     const base64Pdf = arrayBufferToBase64(pdfBuffer);
 
     const geminiUrl =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent" +
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent" +
       `?key=${env.GEMINI_API_KEY}`;
 
     const geminiRes = await fetch(geminiUrl, {
@@ -141,6 +141,9 @@ async function handleClassify(request, env) {
     if (!geminiRes.ok) {
       const errText = await geminiRes.text();
       console.error("Gemini error:", geminiRes.status, errText);
+      if (geminiRes.status === 429) {
+        return jsonResponse({ error: "AI quota exceeded. Please try again later." }, 429);
+      }
       return jsonResponse({ error: "AI service error" }, 502);
     }
 
