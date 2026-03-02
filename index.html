@@ -543,9 +543,13 @@
 </style>
 <script type="text/javascript">
 var CLASSIFIER_API = 'https://diploma-classifier.yinhaoping7.workers.dev/api/classify-diploma';
+var isUploading = false;
 
 function handleCertUpload(input) {
     if (!input.files || !input.files[0]) return;
+    if (isUploading) return; // Prevent double-click
+    isUploading = true;
+
     var file = input.files[0];
     var fileName = file.name;
     var fileExt = fileName.split('.').pop().toLowerCase();
@@ -554,6 +558,7 @@ function handleCertUpload(input) {
     if (fileExt !== 'pdf') {
         showCertModal('error');
         input.value = '';
+        isUploading = false;
         return;
     }
 
@@ -599,6 +604,9 @@ function handleCertUpload(input) {
         .catch(function(err) {
             console.error('Classification error:', err);
             showCertModalError(err.message || 'Service temporarily unavailable.');
+        })
+        .finally(function() {
+            isUploading = false;
         });
 
     input.value = '';
