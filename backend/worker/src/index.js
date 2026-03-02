@@ -15,6 +15,7 @@ import { PDFDocument } from "pdf-lib";
 // ── Constants ────────────────────────────────────────────────────────────────
 const MAX_PAGES = 3;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const RATE_LIMIT_MS = 15000; // Minimum 15 seconds between Gemini API calls
 
 const CLASSIFICATION_PROMPT =
   "You are a forensic document classifier. Analyze this document. " +
@@ -35,6 +36,9 @@ function jsonResponse(body, status = 200) {
     headers: { ...CORS, "Content-Type": "application/json" },
   });
 }
+
+// ── Rate limiter (per-isolate, prevents rapid-fire Gemini calls) ─────────────
+let lastGeminiCall = 0;
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 export default {
@@ -100,7 +104,19 @@ async function handleClassify(request, env) {
       });
     }
 
-    // 3. Send PDF to Gemini 1.5 Flash ----------------------------------------
+    // 3. Rate limit — prevent rapid-fire Gemini calls -------------------------
+    const now = Date.now();
+    const elapsed = now - lastGeminiCall;
+    if (elapsed < RATE_LIMIT_MS) {
+      const waitSec = Math.ceil((RATE_LIMIT_MS - elapsed) / 1000);
+      return jsonResponse(
+        { error: `Rate limited. Please wait ${waitSec} seconds before trying again.` },
+        429,
+      );
+    }
+    lastGeminiCall = now;
+
+    // 4. Send PDF to Gemini 1.5 Flash ----------------------------------------
     const base64Pdf = arrayBufferToBase64(pdfBuffer);
 
     const geminiUrl =
