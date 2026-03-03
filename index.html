@@ -247,14 +247,21 @@
 
         /* --- 3. row_15: SILVERLAKE header --- */
         #row_15 .CModulePA {
-            padding: 12px 16px 6px !important;
+            padding: 14px 16px 8px !important;
         }
         #evMo_37VXk {
-            width: 160px !important;
+            width: auto !important;
+        }
+        #evMo_37VXk .ev-pic img {
+            width: auto !important;
+            height: 32px !important;
         }
         #evMo_hiam7 {
             width: auto !important;
-            margin-top: 2px !important;
+            margin-top: 4px !important;
+        }
+        #evMo_hiam7 .ev-text-title-1 span {
+            font-size: 12px !important;
         }
 
         /* --- 4. row_52: Hero section --- */
@@ -265,25 +272,33 @@
         #row_52 > .customModuleRowInner > .CModulePA {
             min-height: 100vh !important;
             justify-content: center !important;
-            padding: 60px 16px 30px !important;
+            align-items: stretch !important;
+            padding: 60px 20px 30px !important;
             box-sizing: border-box !important;
         }
-        /* Hero title — fits mobile width with padding */
+        /* Hero title — controlled line breaks via JS */
         #evMo_3CtJQ {
             padding: 0 !important;
         }
+        #evMo_3CtJQ .ev-text-title-1 {
+            text-align: left !important;
+        }
         #evMo_3CtJQ .ev-text-title-1 span {
-            font-size: 48px !important;
-            line-height: 1.1 !important;
+            font-size: 52px !important;
+            line-height: 1.05 !important;
+            text-align: left !important;
         }
         /* Subtitle */
         #evMo_a2ZsT {
-            margin-top: 20px !important;
+            margin-top: 24px !important;
             padding: 0 !important;
         }
+        #evMo_a2ZsT .ev-text-title-2 {
+            text-align: center !important;
+        }
         #evMo_a2ZsT .ev-text-title-2 span {
-            font-size: 17px !important;
-            line-height: 1.5 !important;
+            font-size: 18px !important;
+            line-height: 1.6 !important;
         }
         /* Upload button: big teal full-width block */
         #evMo_dov0t {
@@ -576,6 +591,18 @@
         });
         // Strip inline height from CModulePA containers & force to viewport width
         $('.CModulePA').css({'height':'', 'width': vw, 'max-width': vw});
+
+        // --- Mobile text rewrite: controlled line breaks for hero title ---
+        var titleSpan = $('#evMo_3CtJQ .ev-text-title-1 span');
+        if (titleSpan.length) {
+            titleSpan.html('Blockchain<br>Smart Secure<br>Certificate<br>Verification');
+        }
+
+        // --- Mobile text rewrite: move "and" up, put "it is impossible to forge." on its own line ---
+        var subtitleSpan = $('#evMo_a2ZsT .ev-text-title-2 span');
+        if (subtitleSpan.length) {
+            subtitleSpan.html('<em>With Secured Smart Certificate, it is the safest way to issue certificates, to share and verify certified documents, and<br><span style="color:#000000;background-color:#CABC1A;">&nbsp;it is impossible to forge.&nbsp;</span></em>');
+        }
     }
     // Force load any remaining lazy-loading images
     $(function(){
