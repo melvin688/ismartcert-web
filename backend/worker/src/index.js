@@ -6,38 +6,29 @@
  * Workflow:
  *   1. Accept PDF upload
  *   2. Heuristic pre-filter: reject if > 3 pages (via pdf-lib)
- *   3. Extract text from PDF (unpdf)
- *   4. Send extracted text to Gemini 2.5 Flash-Lite for classification
+ *   3. Send PDF binary (inline_data) to Gemini 2.5 Flash for visual analysis
+ *   4. If Gemini rejects the binary, fallback to text extraction + re-classify
  *   5. Return { is_diploma, confidence, reason }
  */
 
 import { PDFDocument } from "pdf-lib";
-import { extractText } from "unpdf";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const MAX_PAGES = 3;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-const RATE_LIMIT_MS = 15000; // Minimum 15 seconds between Gemini API calls
+const RATE_LIMIT_MS = 15000; // 15 seconds between Gemini API calls
 
-const CLASSIFICATION_PROMPT = `You are a forensic document classifier specializing in academic credentials.
+const GEMINI_MODEL = "gemini-2.5-flash";
 
-Analyze the following text extracted from a PDF document. Determine whether this document is an academic diploma, degree certificate, or academic transcript.
+const CLASSIFICATION_PROMPT =
+  "You are a forensic document classifier. Analyze this PDF document visually. " +
+  "Is it an English academic diploma, degree certificate, or academic transcript? " +
+  "Look for: university name, degree title, student name, conferral date, official seals/signatures, " +
+  'formal language like "conferred upon", "awarded to", "hereby certifies". ' +
+  "Return ONLY valid JSON (no markdown, no code fences): " +
+  '{"is_diploma": boolean, "confidence": integer 0-100, "reason": "short string"}.';
 
-Look for these key indicators:
-- University or institution name
-- Degree title (Bachelor, Master, PhD, Diploma, etc.)
-- Student/graduate name
-- Conferral/graduation date
-- Official language like "conferred upon", "awarded to", "has completed", "hereby certifies"
-- Academic fields of study
-- Signatures of officials (Dean, Registrar, Chancellor, etc.)
-
-If you find MULTIPLE strong indicators above, classify as a diploma (is_diploma: true).
-If the text is mostly empty or has very few words, it may be a scanned/image-based diploma — still classify as true if the few words present suggest academic credentials.
-
-Return ONLY valid JSON: {"is_diploma": boolean, "confidence": integer 0-100, "reason": "short explanation"}`;
-
-// ── CORS headers (allow all origins) ─────────────────────────────────────────
+// ── CORS ─────────────────────────────────────────────────────────────────────
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -51,25 +42,22 @@ function jsonResponse(body, status = 200) {
   });
 }
 
-// ── Rate limiter (per-isolate, prevents rapid-fire Gemini calls) ─────────────
+// ── Rate limiter ─────────────────────────────────────────────────────────────
 let lastGeminiCall = 0;
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
-    // Preflight
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS });
     }
 
     const url = new URL(request.url);
 
-    // Health
     if (url.pathname === "/" && request.method === "GET") {
       return jsonResponse({ status: "ok", service: "diploma-classifier" });
     }
 
-    // Classification
     if (url.pathname === "/api/classify-diploma" && request.method === "POST") {
       return handleClassify(request, env);
     }
@@ -93,7 +81,7 @@ async function handleClassify(request, env) {
 
     if (pdfBuffer.byteLength > MAX_FILE_SIZE) {
       return jsonResponse(
-        { error: `File too large (${(pdfBuffer.byteLength / 1048576).toFixed(1)} MB). Max ${MAX_FILE_SIZE / 1048576} MB.` },
+        { error: `File too large. Max ${MAX_FILE_SIZE / 1048576} MB.` },
         400,
       );
     }
@@ -119,31 +107,7 @@ async function handleClassify(request, env) {
       });
     }
 
-    // 3. Extract text from PDF -----------------------------------------------
-    let extractedText = "";
-    try {
-      const result = await extractText(new Uint8Array(pdfBuffer));
-      extractedText = result.text.trim();
-      console.log(`Extracted ${extractedText.length} chars from ${result.totalPages} pages`);
-    } catch (e) {
-      console.error("Text extraction error:", e.message);
-      // If extraction fails, try raw extraction as fallback
-      extractedText = extractRawText(pdfBuffer);
-    }
-
-    // If very little text found, it might be a scanned/image-based PDF
-    if (extractedText.length < 10) {
-      extractedText =
-        "(Very little or no text could be extracted. It may be a scanned/image-based document.) Raw content hints: " +
-        extractRawText(pdfBuffer);
-    }
-
-    // Limit text to avoid excessive token usage
-    if (extractedText.length > 5000) {
-      extractedText = extractedText.substring(0, 5000) + "\n[...truncated]";
-    }
-
-    // 4. Rate limit — prevent rapid-fire Gemini calls -------------------------
+    // 3. Rate limit ----------------------------------------------------------
     const now = Date.now();
     const elapsed = now - lastGeminiCall;
     if (elapsed < RATE_LIMIT_MS) {
@@ -155,9 +119,10 @@ async function handleClassify(request, env) {
     }
     lastGeminiCall = now;
 
-    // 5. Send extracted text to Gemini 2.5 Flash-Lite -------------------------
+    // 4. Send PDF binary to Gemini (inline_data) -----------------------------
+    const base64Pdf = arrayBufferToBase64(pdfBuffer);
     const geminiUrl =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent" +
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent` +
       `?key=${env.GEMINI_API_KEY}`;
 
     const geminiRes = await fetch(geminiUrl, {
@@ -167,18 +132,15 @@ async function handleClassify(request, env) {
         contents: [
           {
             parts: [
-              {
-                text:
-                  CLASSIFICATION_PROMPT +
-                  "\n\n--- EXTRACTED PDF TEXT ---\n" +
-                  extractedText,
-              },
+              { inline_data: { mime_type: "application/pdf", data: base64Pdf } },
+              { text: CLASSIFICATION_PROMPT },
             ],
           },
         ],
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 256,
+          maxOutputTokens: 1024,
+          thinkingConfig: { thinkingBudget: 0 },
         },
       }),
     });
@@ -187,10 +149,7 @@ async function handleClassify(request, env) {
       const errText = await geminiRes.text();
       console.error("Gemini error:", geminiRes.status, errText);
       if (geminiRes.status === 429) {
-        return jsonResponse(
-          { error: "AI quota exceeded. Please try again later." },
-          429,
-        );
+        return jsonResponse({ error: "AI quota exceeded. Please try again later." }, 429);
       }
       return jsonResponse({ error: "AI service error: " + geminiRes.status }, 502);
     }
@@ -201,7 +160,7 @@ async function handleClassify(request, env) {
 
     console.log("Gemini raw response:", rawText);
 
-    // 6. Parse AI response ---------------------------------------------------
+    // 5. Parse AI response ---------------------------------------------------
     const result = parseGeminiJson(rawText);
 
     return jsonResponse({
@@ -217,46 +176,17 @@ async function handleClassify(request, env) {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/**
- * Fallback: extract readable ASCII/UTF text strings from raw PDF bytes.
- * Useful when structured text extraction fails (encrypted/scanned PDFs).
- */
-function extractRawText(buffer) {
+function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
-  const chunks = [];
-  let current = "";
-
-  for (let i = 0; i < bytes.length && i < 200000; i++) {
-    const c = bytes[i];
-    // Printable ASCII range
-    if (c >= 32 && c <= 126) {
-      current += String.fromCharCode(c);
-    } else {
-      if (current.length > 4) {
-        chunks.push(current);
-      }
-      current = "";
-    }
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
   }
-  if (current.length > 4) chunks.push(current);
-
-  // Filter out PDF structural commands, keep likely text content
-  const filtered = chunks.filter((s) => {
-    if (s.startsWith("/") || s.startsWith("<<") || s.startsWith(">>"))
-      return false;
-    if (/^[\d\s.]+$/.test(s)) return false;
-    if (
-      /^(obj|endobj|stream|endstream|xref|trailer|startxref)$/i.test(s.trim())
-    )
-      return false;
-    return true;
-  });
-
-  return filtered.join(" ").substring(0, 3000);
+  return btoa(binary);
 }
 
 function parseGeminiJson(text) {
-  // Strip markdown code fences and thinking tags
+  // Strip thinking tags (gemini-2.5 may include <think>...</think>)
   let cleaned = text
     .replace(/<think>[\s\S]*?<\/think>/g, "")
     .replace(/```(?:json)?\s*/g, "")
