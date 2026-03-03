@@ -532,17 +532,15 @@
         </div>
 
         <!-- Loading State -->
-        <div id="certLoading" style="display:none; text-align:center; padding:0;">
-            <div style="background:#1a1a1a; border-radius:8px; padding:40px 30px 25px; margin:0 -24px -20px -24px;">
-                <div class="wave-bars" style="display:flex; align-items:flex-end; justify-content:center; height:50px; gap:6px;">
-                    <span style="width:3px; background:rgba(255,255,255,0.85); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0s;"></span>
-                    <span style="width:3px; background:rgba(255,255,255,0.85); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0.15s;"></span>
-                    <span style="width:3px; background:rgba(255,255,255,0.85); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0.3s;"></span>
-                    <span style="width:3px; background:rgba(255,255,255,0.85); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0.45s;"></span>
-                    <span style="width:3px; background:rgba(255,255,255,0.85); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0.6s;"></span>
-                </div>
-                <p style="margin-top:18px; color:rgba(255,255,255,0.7); font-size:14px; letter-spacing:1px;">Please wait</p>
+        <div id="certLoading" style="display:none; text-align:center; padding:40px 0;">
+            <div class="wave-bars" style="display:flex; align-items:flex-end; justify-content:center; height:50px; gap:6px;">
+                <span style="width:3px; background:rgba(255,255,255,0.8); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0s;"></span>
+                <span style="width:3px; background:rgba(255,255,255,0.8); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0.15s;"></span>
+                <span style="width:3px; background:rgba(255,255,255,0.8); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0.3s;"></span>
+                <span style="width:3px; background:rgba(255,255,255,0.8); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0.45s;"></span>
+                <span style="width:3px; background:rgba(255,255,255,0.8); border-radius:1.5px; animation:waveBar 1.2s ease-in-out infinite; animation-delay:0.6s;"></span>
             </div>
+            <p style="margin-top:18px; color:rgba(255,255,255,0.7); font-size:14px; letter-spacing:1px;">Please wait</p>
         </div>
     </div>
 </div>
@@ -646,20 +644,30 @@ function showCertModalError(reason) {
 
 function showCertModal(state) {
     var modal = document.getElementById('certModal');
+    var innerBox = modal.querySelector(':scope > div');
+    var closeBtn = modal.querySelector(':scope > div > span');
     modal.style.display = 'flex';
     document.getElementById('certVerified').style.display = 'none';
     document.getElementById('certInvalid').style.display = 'none';
     document.getElementById('certError').style.display = 'none';
     document.getElementById('certLoading').style.display = 'none';
 
-    if (state === 'verified') {
-        document.getElementById('certVerified').style.display = 'block';
-    } else if (state === 'invalid') {
-        document.getElementById('certInvalid').style.display = 'block';
-    } else if (state === 'error') {
-        document.getElementById('certError').style.display = 'block';
-    } else if (state === 'loading') {
+    if (state === 'loading') {
+        innerBox.style.background = 'transparent';
+        innerBox.style.boxShadow = 'none';
+        closeBtn.style.display = 'none';
         document.getElementById('certLoading').style.display = 'block';
+    } else {
+        innerBox.style.background = '#fff';
+        innerBox.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)';
+        closeBtn.style.display = '';
+        if (state === 'verified') {
+            document.getElementById('certVerified').style.display = 'block';
+        } else if (state === 'invalid') {
+            document.getElementById('certInvalid').style.display = 'block';
+        } else if (state === 'error') {
+            document.getElementById('certError').style.display = 'block';
+        }
     }
 }
 
