@@ -37,6 +37,8 @@
     var channel_type = 0;
     var channel_id = 0;
     var userSiteWidth = 1500;
+    // Mobile override: prevent template from forcing 1500px
+    if (window.innerWidth <= 768) { userSiteWidth = window.innerWidth; }
     var is_action = false;
     var isParentWindow = false;
     var rowIds = "52,66,15,16,69";
@@ -473,7 +475,17 @@
     
     <script type="text/javascript">
     $("body").attr('id','webBody');
-    wsf.fullRow.countMoPosition();
+    // On mobile, skip template's absolute-positioning recalculation & width forcing
+    if (window.innerWidth > 768) {
+        wsf.fullRow.countMoPosition();
+    } else {
+        // Neutralize loadWidth so it never forces body to 1500px on mobile
+        wsf.loadWidth = function(){};
+        wsf.windowResize = function(){};
+        // Reset any body/html width the template may have already set
+        $('body').css('width', 'auto');
+        $('html').css('width', 'auto');
+    }
     // Force load any remaining lazy-loading images
     $(function(){
         $('img.lazy-loading').each(function(){
