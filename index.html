@@ -247,21 +247,30 @@
 
         /* --- 3. row_15: SILVERLAKE header --- */
         #row_15 .CModulePA {
-            padding: 14px 16px 8px !important;
+            padding: 16px 16px 10px !important;
+            align-items: center !important;
         }
         #evMo_37VXk {
             width: auto !important;
         }
+        #evMo_37VXk .ev-pic {
+            text-align: center !important;
+        }
         #evMo_37VXk .ev-pic img {
             width: auto !important;
-            height: 32px !important;
+            height: 28px !important;
+            display: inline-block !important;
         }
         #evMo_hiam7 {
             width: auto !important;
-            margin-top: 4px !important;
+            margin-top: 6px !important;
+        }
+        #evMo_hiam7 .ev-text-title-1 {
+            text-align: center !important;
         }
         #evMo_hiam7 .ev-text-title-1 span {
-            font-size: 12px !important;
+            font-size: 13px !important;
+            letter-spacing: 0.5px !important;
         }
 
         /* --- 4. row_52: Hero section --- */
@@ -272,8 +281,8 @@
         #row_52 > .customModuleRowInner > .CModulePA {
             min-height: 100vh !important;
             justify-content: center !important;
-            align-items: stretch !important;
-            padding: 60px 20px 30px !important;
+            align-items: center !important;
+            padding: 70px 24px 30px !important;
             box-sizing: border-box !important;
         }
         /* Hero title — controlled line breaks via JS */
@@ -281,12 +290,12 @@
             padding: 0 !important;
         }
         #evMo_3CtJQ .ev-text-title-1 {
-            text-align: left !important;
+            text-align: center !important;
         }
         #evMo_3CtJQ .ev-text-title-1 span {
             font-size: 52px !important;
-            line-height: 1.05 !important;
-            text-align: left !important;
+            line-height: 1.08 !important;
+            text-align: center !important;
         }
         /* Subtitle */
         #evMo_a2ZsT {
@@ -307,28 +316,30 @@
             box-sizing: border-box !important;
         }
         #evMo_dov0t .ev-module-edit-box {
-            height: auto !important;
+            height: 60px !important;
+            position: relative !important;
         }
         #evMo_dov0t .ev-base-button {
-            position: relative !important;
+            position: absolute !important;
             width: 100% !important;
-            height: auto !important;
+            height: 100% !important;
             display: block !important;
             box-sizing: border-box !important;
         }
         #evMo_dov0t .ev-base-button .btn-m {
-            position: relative !important;
+            position: absolute !important;
             width: 100% !important;
-            height: auto !important;
-            display: block !important;
-            padding: 18px 0 !important;
+            height: 100% !important;
+            left: 0 !important;
+            top: 0 !important;
             background-color: rgb(0, 191, 165) !important;
-            border-radius: 6px !important;
+            border-radius: 8px !important;
+            border: none !important;
         }
         #evMo_dov0t .ev-base-button .btn-text {
             position: relative !important;
-            top: auto !important;
-            margin-top: 0 !important;
+            top: 50% !important;
+            margin-top: -0.5em !important;
             display: block !important;
             font-size: 18px !important;
             font-weight: 600 !important;
@@ -589,6 +600,8 @@
         $('#row_15 .ev-module-edit, #row_52 .ev-module-edit, #row_66 .ev-module-edit, #row_16 .ev-module-edit').each(function(){
             $(this).css({'width':'', 'left':'', 'top':'', 'height':''});
         });
+        // Give button module explicit height for proper background overlay
+        $('#evMo_dov0t').css({'height': '60px'});
         // Strip inline height from CModulePA containers & force to viewport width
         $('.CModulePA').css({'height':'', 'width': vw, 'max-width': vw});
 
