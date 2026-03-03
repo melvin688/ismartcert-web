@@ -133,7 +133,23 @@
        MOBILE RESPONSIVE — Full override of template layout system
        ================================================================ */
     @media (max-width: 768px) {
-        /* --- 1. NUKE the 1500px fixed width system --- */
+        /* --- 1. NUCLEAR RESET: force everything to viewport width --- */
+        html, body {
+            width: 100% !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+        }
+        #wrapper,
+        .wrapper,
+        .wrapper-1500,
+        .mainContainer,
+        .addContainer,
+        .headFullXY,
+        .fullSubNavBox {
+            width: 100% !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+        }
         .wrapper-1500 .customModuleRow,
         .wrapper-1500 .customModuleRowInner,
         .wrapper-1500 .topBarArea,
@@ -142,8 +158,12 @@
         .wrapper-1500 .bannerArea,
         .wrapper-1500 .footerConArea,
         .wrapper-1500 .frameContainer,
-        .wrapper-1500 .absoluteModuleInner {
+        .wrapper-1500 .absoluteModuleInner,
+        .customModuleRowInner,
+        .customModuleRow {
             width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
         .headPublicModuleRow > .customModuleRowInner {
             width: 100% !important;
@@ -151,10 +171,10 @@
         .CModulePA {
             max-width: 100% !important;
             width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         /* --- 2. Convert absolute-positioned modules to flow layout --- */
-        /* ALL CModulePA containers become flex columns on mobile */
         #row_15 .CModulePA,
         #row_52 .CModulePA,
         #row_66 .CModulePA,
@@ -164,22 +184,24 @@
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
+            overflow: hidden !important;
         }
 
-        /* ALL ev-module-edit inside our rows: disable absolute, become flow items */
+        /* ALL ev-module-edit: disable absolute, become flow items */
         #row_15 .ev-module-edit,
         #row_52 .ev-module-edit,
         #row_66 .ev-module-edit,
         #row_16 .ev-module-edit {
             position: relative !important;
-            left: auto !important;
-            top: auto !important;
+            left: 0 !important;
+            top: 0 !important;
             width: 100% !important;
             height: auto !important;
             max-width: 100% !important;
+            box-sizing: border-box !important;
         }
 
-        /* ev-module-edit-box: switch from absolute to relative */
+        /* ev-module-edit-box: relative + auto height */
         #row_15 .ev-module-edit-box,
         #row_52 .ev-module-edit-box,
         #row_66 .ev-module-edit-box,
@@ -197,10 +219,18 @@
             position: relative !important;
             height: auto !important;
             width: 100% !important;
+            overflow: visible !important;
+        }
+
+        /* force all text overflow to wrap */
+        h1, h2, h3, p, span, a, b, em, div {
+            max-width: 100% !important;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
         }
 
         /* Images must be responsive */
-        .ev-pic img {
+        .ev-pic, .ev-pic img {
             width: 100% !important;
             height: auto !important;
             max-width: 100% !important;
@@ -221,30 +251,31 @@
         /* --- 4. row_52: Hero section --- */
         #row_52 {
             width: 100% !important;
+            max-width: 100vw !important;
         }
         #row_52 > .customModuleRowInner > .CModulePA {
             min-height: 100vh !important;
             justify-content: center !important;
-            padding: 80px 24px 40px !important;
+            padding: 60px 20px 30px !important;
             box-sizing: border-box !important;
         }
-        /* Hero title font */
+        /* Hero title font - smaller to fit mobile */
         #evMo_3CtJQ .ev-text-title-1 span {
-            font-size: 42px !important;
-            line-height: 1.1 !important;
+            font-size: 36px !important;
+            line-height: 1.15 !important;
         }
         /* Subtitle font */
         #evMo_a2ZsT {
-            margin-top: 20px !important;
+            margin-top: 18px !important;
         }
         #evMo_a2ZsT .ev-text-title-2 span {
-            font-size: 16px !important;
+            font-size: 15px !important;
             line-height: 1.6 !important;
         }
-        /* Upload button: full width with padding */
+        /* Upload button: full width */
         #evMo_dov0t {
-            margin-top: 24px !important;
-            padding: 0 10px !important;
+            margin-top: 20px !important;
+            padding: 0 !important;
             box-sizing: border-box !important;
         }
         #evMo_dov0t .ev-base-button {
@@ -252,24 +283,25 @@
             box-sizing: border-box !important;
         }
         #evMo_dov0t .ev-base-button .btn-text {
-            font-size: 16px !important;
+            font-size: 15px !important;
         }
         /* How it works? */
         #evMo_cZ6dm {
-            margin-top: 16px !important;
+            margin-top: 14px !important;
             width: auto !important;
         }
 
         /* --- 5. row_66: Trusted solution section --- */
         #row_66 {
             width: 100% !important;
+            max-width: 100vw !important;
         }
         #row_66 > .customModuleRowInner > .CModulePA {
-            padding: 40px 20px 30px !important;
+            padding: 30px 16px 20px !important;
             box-sizing: border-box !important;
         }
         #evMo_WSKkN .ev-text-title-1 span {
-            font-size: 28px !important;
+            font-size: 26px !important;
             line-height: 1.2 !important;
         }
         /* Hide the shape background on mobile, show only the image */
@@ -277,10 +309,13 @@
             display: none !important;
         }
         #evMo_BJUTg {
-            margin-top: 20px !important;
+            margin-top: 16px !important;
         }
 
         /* --- 6. row_16: Footer --- */
+        #row_16 {
+            width: 100% !important;
+        }
         #row_16 > .customModuleRowInner > .CModulePA {
             padding: 14px 10px !important;
         }
@@ -291,7 +326,7 @@
         /* --- 7. Modal responsive --- */
         #certModal > div {
             max-width: 90% !important;
-            padding: 24px 20px !important;
+            padding: 24px 18px !important;
         }
 
         /* --- 8. Sticky header responsive --- */
@@ -302,6 +337,13 @@
         /* --- 9. Hide header/headFullXY boilerplate on mobile --- */
         .headFullXY .header {
             display: none !important;
+        }
+
+        /* --- 10. Prevent absoluteModuleWrap from creating overflow --- */
+        .absoluteModuleWrap,
+        .absoluteModuleInner {
+            width: 100% !important;
+            position: relative !important;
         }
     }
     </style>
@@ -482,9 +524,19 @@
         // Neutralize loadWidth so it never forces body to 1500px on mobile
         wsf.loadWidth = function(){};
         wsf.windowResize = function(){};
+        if (wsf.fullRow) wsf.fullRow.countMoPosition = function(){};
         // Reset any body/html width the template may have already set
-        $('body').css('width', 'auto');
-        $('html').css('width', 'auto');
+        $('body').css({'width':'', 'min-width':''});
+        $('html').css({'width':'', 'min-width':''});
+        $('#wrapper').css({'width':'', 'min-width':''});
+        // Strip inline widths from all module rows & their inners
+        $('.customModuleRow, .customModuleRowInner').css({'width':'', 'min-width':''});
+        // Strip inline width/left/top from ev-module-edit within page rows
+        $('#row_15 .ev-module-edit, #row_52 .ev-module-edit, #row_66 .ev-module-edit, #row_16 .ev-module-edit').each(function(){
+            $(this).css({'width':'', 'left':'', 'top':'', 'height':''});
+        });
+        // Strip inline height from CModulePA containers
+        $('.CModulePA').css({'height':''});
     }
     // Force load any remaining lazy-loading images
     $(function(){
