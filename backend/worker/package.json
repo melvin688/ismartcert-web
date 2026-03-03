@@ -7,7 +7,8 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "unpdf": "^1.4.0"
   },
   "devDependencies": {
     "wrangler": "^3.99.0"
