@@ -246,13 +246,17 @@
         }
 
         /* --- 3. row_15: SILVERLAKE header --- */
+        #row_15 {
+            background-color: rgba(0, 0, 0, 0.35) !important;
+        }
         #row_15 .CModulePA {
-            padding: 28px 16px 10px !important;
+            padding: 32px 16px 12px !important;
             align-items: center !important;
         }
         #evMo_37VXk {
             width: 200px !important;
             overflow: hidden !important;
+            margin-top: 6px !important;
         }
         #evMo_37VXk .ev-pic {
             text-align: center !important;
@@ -365,18 +369,28 @@
             max-width: 100vw !important;
         }
         #row_66 > .customModuleRowInner > .CModulePA {
-            padding: 30px 16px 20px !important;
+            padding: 32px 16px 24px !important;
             box-sizing: border-box !important;
         }
+        #evMo_WSKkN .ev-text-title-1 {
+            text-align: center !important;
+        }
         #evMo_WSKkN .ev-text-title-1 span {
-            font-size: 26px !important;
-            line-height: 1.2 !important;
+            font-size: 30px !important;
+            line-height: 1.15 !important;
         }
         #evMo_K4Vbq {
             display: none !important;
         }
         #evMo_BJUTg {
-            margin-top: 16px !important;
+            margin-top: 18px !important;
+            background: #ffffff !important;
+            padding: 12px !important;
+            border-radius: 6px !important;
+            box-sizing: border-box !important;
+        }
+        #evMo_BJUTg .ev-pic img {
+            display: block !important;
         }
 
         /* --- 6. row_16: Footer --- */
@@ -620,6 +634,12 @@
         var subtitleSpan = $('#evMo_a2ZsT .ev-text-title-2 span');
         if (subtitleSpan.length) {
             subtitleSpan.html('<em>With Secured Smart Certificate, it is the safest way to issue certificates, to share and verify certified documents, and<br><span style="color:#000000;background-color:#CABC1A;">&nbsp;it is impossible to forge.&nbsp;</span></em>');
+        }
+
+        // --- Mobile text rewrite: controlled line breaks for trusted section ---
+        var trustedSpan = $('#evMo_WSKkN .ev-text-title-1 span');
+        if (trustedSpan.length) {
+            trustedSpan.html('The trusted<br>solution for<br>issuing<br>verifiable<br>documents to<br>the<br>blockchain');
         }
     }
     // Force load any remaining lazy-loading images
