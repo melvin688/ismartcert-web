@@ -73,23 +73,6 @@
 </script>
                     <link rel="stylesheet" href="static/css/skin.min.css">
 <script type="text/javascript" src="static/js/ev_popup.min.js"></script>
-<script type="text/javascript">
-  function createLogin(trespass,userid){
-      $.popup({
-        type : 5,
-        cName : "evPopupOpacity",
-        head  : {yes:0},
-        shade : {yes : 1, bgColor : '#000', opacity : 0.6, animate : {type : 1 , target : 0.6}, close : false},
-        area  : {w:790,h:500},
-        con   : {
-          src : '/dom/alert_login.php?username=ismartcert&trespass='+trespass+'&userid='+userid
-        }
-      });
-  }
-</script>
-    <script type="text/javascript">
-        var websiteHostPreg = /[\w][\w-]*\.(?:com\.cn|net\.cn|org\.cn|tj\.cn|sh\.cn|hn\.cn|com\.au|com\.pg|com\.tw|tw\.cn|com\.sg|com\.mo|co\.uk|co\.nz|co\.ke|fj\.cn|co\.th|co\.cn|jl\.cn|school\.nz|co\.jp|hk\.com|com\.hk|edu\.hk|cn\.com|gd\.cn|hk\.cn|bj\.cn|gx\.cn|bixiaokeji\.cn|com\.my|com|in|im|cm|ca|cn|cx|ch|cl|tw|kr|word|sg|it|itd|co|mo|net|org|gov|auto|poker|blue|green|studio|icu|cc|io|pl|plus|jp|de|biz|info|gold|today|chat|at|company|cool|fund|fans|team|beer|guru|social|run|ae|fit|luxe|video|black|yoga|art|hn|xyz|hk|us|mobi|wang|me|tax|so|top|law|win|vip|ltd|red|ru|nz|love|ac\.cn|gz\.cn|xn--55qw42g|xn--g2xx48c|xn--imr513n|xn--czru2d|xn--otu796d|xn--kput3i|xin|xn--1qqw23a|xn--3ds443g|xn--5tzm5g|city|shop|site|ai|tm|club|fun|online|cyou|space|cloud|world|sale|website|host|show|asia|center|link|gov\.cn|gs\.cn|keyun\.li|name|press|pro|work|tv|fr|kim|group|tech|store|capital|ren|vn|racing|ink|nl|pub|live|my|no|life|zone|one|games|bike|cafe|wiki|design|mba|es|fi|uk|ph|wtf|xn--zfr164b|xn--fiq228c5hs|xn--vhquv|xn--6qq986b3xl|xn--fiqs8s|xn--czr694b|xn--xhq521b|xn--ses554g|xn--hxt814e|xn--55qx5d|xn--io0a7i|xn--rhqv96g|xn--vuq861b|xn--3bst00m)(\/|$)/;
-    </script>
     <script type="text/javascript" src="static/js/public.js"></script>
     <script type="text/javascript" src="static/js/lightgallery-all.min.js"></script>
     <link type="text/css" rel="stylesheet" href="static/css/lightgallery.min.css">
@@ -455,7 +438,7 @@
     }
     </style>
         <script type="text/javascript" src="static/js/base64.min.js"></script>
-    <script type="text/javascript" src="static/js/json2.js"></script>
+
         <script id="languages_jquery_validationEngine_js" type="text/javascript" src="static/js/jquery.validationEngine-zh_CN.js"></script>
     
                         <script id="chplayer_min_js" type="text/javascript" src="static/js/chplayer.js"></script>
@@ -484,8 +467,7 @@
         </div>
     </div>
 
-<link type="text/css" rel="stylesheet" id="sliding_verification_style_css" href="static/css/sliding_verification_style.css">
-<script type="text/javascript" id="sliding_tn_code_js" src="static/js/sliding_tn_code.js"></script>
+
 <script type="text/javascript">
     
         function userUserLoginInfo() {
@@ -683,40 +665,6 @@
     });
 </script>
 
-            
-
-
-
-    
-
-    
-    
-<script type="text/javascript">
-    window.onscroll=function(){
-        var winTop_1=document.documentElement.scrollTop;
-        var winTop_2=document.body.scrollTop;
-        var winTop;
-        (winTop_1>winTop_2)?winTop=winTop_1:winTop=winTop_2;
-        if(winTop>0){
-            $("#backTop").css({'display':'block'});
-        }
-        if(winTop == 0){
-            $("#backTop").css({'display':'none'});
-        }
-    }
-</script>
-
-
-                    <script type="text/javascript">
-	$(function() {
-		$("a[href$='#_blank']").attr('target','_blank');
-		//$("a[href^='http://']").attr('target','_blank');
-	$("a[href$='#_blank']").each(function(){
-		var tmp_url=$(this).attr('href').slice(0,-7);
-		$(this).attr('href',tmp_url);
-	});
-		})
-</script>
 <script type="text/javascript">
     var ev_log_userid = '2320384';
     var is_edit='';
@@ -726,64 +674,6 @@
     var hide_big_qu_ids=[];
     var is_move=0;
 </script>
-<script src="static/js/md5.js"></script>
-<!-- site_stats.js removed: original template stats, not functional on GitHub Pages -->
-
-
-        
-	                                                        	                
-
-  <script>
-      (function(){
-          var bp = document.createElement('script');
-          var curProtocol = window.location.protocol.split(':')[0];
-          if (curProtocol === 'https') {
-              bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
-          }
-          else {
-              bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-          }
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(bp, s);
-      })();
-  </script>
-
-
-    
-    
-    
-    
-    <script type="text/javascript">
-        $(function() {
-            $("body").on("click", ".fieldTypeUploadFile", function() {
-                var id = $(this).data("id");
-                if (!id) {
-                    return false;
-                }
-
-                $.popup({
-                            type: 5,
-                            head: {"text": $(this).data("name")},
-                            area: {w: 600, h: 400},
-                            con : {
-                                src: "/dom/FormFile.php?username=ismartcert&field_id="+ id
-                            }
-                        });
-            });
-        });
-
-        function updateFormFieldUploadfile(fieldId, filePath) {
-            jQuery("#field_"+ fieldId).validationEngine('hide')
-            $("#field_"+ fieldId).css("background-image", "none");
-            $("#field_"+ fieldId).val(filePath);
-        }
-    </script>
-
-    
-    
-<!-- Hidden image tracking removed: stat.png & count_time.png not functional on GitHub Pages -->
-
-
 
 </div>
 
@@ -1049,25 +939,7 @@ document.getElementById('certModal').addEventListener('click', function(e) {
 </script>
 
 
-<script type="text/javascript">
-    $(function(){
-        if($('#select2').length){
-            var mobile_class = $('#mobile').attr('class');
-            $('#select2').change(function(){
-                var val =$(this).val();
-                if(val != '+86'){
-                    $('#mobile').attr('class','text-input validate[required]');
-                }else{
-                    $('#mobile').attr('class',mobile_class);
-                }
-            })
-        }
-        var vs = $(".video-js").attr("style");
-        setTimeout(function(){
-            $(".video-js").attr("style",$(".video-js").attr("style")+vs);
-        },1000)
-    })
-</script>
+
 </body>
 
 
