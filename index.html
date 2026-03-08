@@ -812,8 +812,7 @@
 // Fallback: workers.dev (accessible outside China)
 var CLASSIFIER_API_PRIMARY = 'https://api.ismartcet.com/api/classify-diploma';
 var CLASSIFIER_API_FALLBACK = 'https://diploma-classifier.yinhaoping7.workers.dev/api/classify-diploma';
-var CLASSIFIER_API = CLASSIFIER_API_PRIMARY;
-var CLASSIFIER_TIMEOUT_MS = 25000;
+var CLASSIFIER_TIMEOUT_MS = 40000; // 40s to allow Worker's 30s AI timeout
 var isUploading = false;
 
 function buildClassifierFormData(file) {
@@ -839,14 +838,13 @@ function fetchWithTimeout(url, options, timeoutMs) {
 
 function handleCertUpload(input) {
     if (!input.files || !input.files[0]) return;
-    if (isUploading) return; // Prevent double-click
+    if (isUploading) return;
     isUploading = true;
 
     var file = input.files[0];
     var fileName = file.name;
     var fileExt = fileName.split('.').pop().toLowerCase();
 
-    // Non-PDF: immediate local rejection
     if (fileExt !== 'pdf') {
         showCertModal('error');
         input.value = '';
@@ -854,10 +852,9 @@ function handleCertUpload(input) {
         return;
     }
 
-    // Show loading
     showCertModal('loading');
+    console.log('[Upload] file=' + fileName + ' size=' + file.size + ' starting...');
 
-    // Compute SHA-256 hash locally while we wait
     var hashPromise = file.arrayBuffer().then(function(buffer) {
         if (window.crypto && window.crypto.subtle) {
             return crypto.subtle.digest('SHA-256', buffer).then(function(hb) {
@@ -867,63 +864,70 @@ function handleCertUpload(input) {
         return generateFakeHash();
     }).catch(function() { return generateFakeHash(); });
 
-    // Send PDF to backend API for diploma classification
-    // With automatic fallback: try primary (custom domain) first,
-    // if network error (blocked/timeout), retry with fallback (workers.dev)
-    function callClassifierAPI(apiUrl) {
+    function callClassifierAPI(apiUrl, label) {
+        var startTime = Date.now();
+        console.log('[Upload] trying ' + label + ': ' + apiUrl);
         return fetchWithTimeout(apiUrl, {
             method: 'POST',
             body: buildClassifierFormData(file)
         }, CLASSIFIER_TIMEOUT_MS)
             .then(function(res) {
+                console.log('[Upload] ' + label + ' responded status=' + res.status + ' in ' + (Date.now() - startTime) + 'ms');
                 if (res.status === 429) {
-                    return res.json().then(function(d) { throw new Error(d.error || 'Rate limited'); });
+                    return res.json().then(function(d) {
+                        var err = new Error(d.error || 'Rate limited');
+                        err.serverError = true;
+                        throw err;
+                    });
                 }
                 if (!res.ok) {
-                    return res.json().then(function(d) { throw new Error(d.error || 'Server error'); });
+                    return res.json().then(function(d) {
+                        var err = new Error(d.error || 'Server error ' + res.status);
+                        err.serverError = true;
+                        throw err;
+                    });
                 }
                 return res.json();
             });
     }
 
-    callClassifierAPI(CLASSIFIER_API_PRIMARY)
+    function shouldFallback(err) {
+        if (err.name === 'AbortError') return true;
+        if (err.name === 'TypeError') return true;
+        if (err.message === 'Failed to fetch') return true;
+        if (err.serverError) return true;
+        return false;
+    }
+
+    callClassifierAPI(CLASSIFIER_API_PRIMARY, 'primary')
         .catch(function(primaryErr) {
-            // If primary fails with network error or timeout, try fallback
-            if (primaryErr.name === 'AbortError' || primaryErr.message === 'Failed to fetch' || primaryErr.name === 'TypeError') {
-                console.warn('Primary API unreachable, trying fallback...', primaryErr);
-                return fetchWithTimeout(CLASSIFIER_API_FALLBACK, {
-                    method: 'POST',
-                    body: buildClassifierFormData(file)
-                }, CLASSIFIER_TIMEOUT_MS)
-                    .then(function(res) {
-                        if (res.status === 429) {
-                            return res.json().then(function(d) { throw new Error(d.error || 'Rate limited'); });
-                        }
-                        if (!res.ok) {
-                            return res.json().then(function(d) { throw new Error(d.error || 'Server error'); });
-                        }
-                        return res.json();
-                    });
+            if (shouldFallback(primaryErr)) {
+                console.warn('[Upload] primary failed (' + primaryErr.message + '), trying fallback...');
+                return callClassifierAPI(CLASSIFIER_API_FALLBACK, 'fallback');
             }
             throw primaryErr;
         })
         .then(function(data) {
+            console.log('[Upload] result:', JSON.stringify(data));
             if (data.is_diploma) {
-                // Diploma verified — show with hash
                 hashPromise.then(function(hash) {
                     displayVerifiedResult(fileName, hash);
                 });
             } else {
-                // Not a diploma — show error with reason
                 var reason = data.reason || 'Document is not registered.';
                 showCertModalError(reason);
             }
         })
         .catch(function(err) {
-            console.error('Classification error:', err);
-            var message = err && err.name === 'AbortError'
-                ? 'Verification timed out. Please try again with a smaller PDF or retry later.'
-                : (err.message || 'Service temporarily unavailable.');
+            console.error('[Upload] final error:', err.name, err.message);
+            var message;
+            if (err.name === 'AbortError') {
+                message = 'Verification timed out. Please try again with a smaller PDF or retry later.';
+            } else if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+                message = 'Unable to reach the verification server. Please check your network and retry.';
+            } else {
+                message = err.message || 'Service temporarily unavailable.';
+            }
             showCertModalError(message);
         })
         .finally(function() {

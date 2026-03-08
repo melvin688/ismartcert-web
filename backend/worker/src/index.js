@@ -16,8 +16,8 @@ import { PDFDocument } from "pdf-lib";
 // ── Constants ────────────────────────────────────────────────────────────────
 const MAX_PAGES = 3;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-const RATE_LIMIT_MS = 15000; // 15 seconds between Gemini API calls
-const AI_TIMEOUT_MS = 20000;
+const RATE_LIMIT_MS = 5000; // 5 seconds between Gemini API calls
+const AI_TIMEOUT_MS = 30000;
 
 const GEMINI_MODEL = "gemini-2.5-flash";
 
@@ -213,7 +213,13 @@ async function handleClassify(request, env) {
     console.log(`[${requestId}] Gemini raw response:`, rawText);
 
     // 5. Parse AI response ---------------------------------------------------
-    const result = parseGeminiJson(rawText);
+    let result;
+    try {
+      result = parseGeminiJson(rawText);
+    } catch (parseErr) {
+      console.warn(`[${requestId}] Gemini returned non-JSON, treating as non-diploma`);
+      result = { is_diploma: false, confidence: 80, reason: rawText.slice(0, 200) || "AI could not classify this document." };
+    }
 
     console.log(`[${requestId}] classification completed totalMs=${Date.now() - startedAt}`);
 
