@@ -808,13 +808,17 @@
 }
 </style>
 <script type="text/javascript">
-// Primary: custom domain (accessible in mainland China via Cloudflare CDN)
-// Fallback: workers.dev (accessible outside China)
-var CLASSIFIER_API_PRIMARY = 'https://api.ismartcet.com/api/classify-diploma';
-var CLASSIFIER_API_FALLBACK = 'https://diploma-classifier.yinhaoping7.workers.dev/api/classify-diploma';
+// Endpoints — probe both at page load, use whichever responds first
+var CLASSIFIER_ENDPOINTS = [
+    'https://api.ismartcet.com',
+    'https://diploma-classifier.yinhaoping7.workers.dev'
+];
+var CLASSIFY_PATH = '/api/classify-diploma';
 var CLASSIFIER_TIMEOUT_MS = 45000;
-var MAX_RETRIES = 2;
+var PROBE_TIMEOUT_MS = 5000;
+var MAX_RETRIES = 1;
 var isUploading = false;
+var _reachableEndpoint = null; // cached after probe
 
 function buildClassifierFormData(file) {
     var formData = new FormData();
@@ -836,6 +840,33 @@ function fetchWithTimeout(url, options, timeoutMs) {
         clearTimeout(timer);
     });
 }
+
+// Probe endpoints: race them, first 200 wins
+function probeEndpoints() {
+    console.log('[Probe] testing endpoints...');
+    return Promise.any(
+        CLASSIFIER_ENDPOINTS.map(function(base) {
+            var c = new AbortController();
+            var t = setTimeout(function() { c.abort(); }, PROBE_TIMEOUT_MS);
+            return fetch(base + '/', { method: 'GET', signal: c.signal, mode: 'cors' })
+                .then(function(res) {
+                    clearTimeout(t);
+                    if (res.ok) {
+                        console.log('[Probe] reachable: ' + base);
+                        return base;
+                    }
+                    throw new Error('status ' + res.status);
+                })
+                .catch(function(err) { clearTimeout(t); throw err; });
+        })
+    ).catch(function() {
+        console.warn('[Probe] no endpoint reachable, will try all on upload');
+        return null;
+    });
+}
+
+// Run probe at page load
+probeEndpoints().then(function(base) { _reachableEndpoint = base; });
 
 function callWithRetry(file, apiUrl, label, retriesLeft) {
     var startTime = Date.now();
@@ -867,7 +898,7 @@ function callWithRetry(file, apiUrl, label, retriesLeft) {
         .catch(function(err) {
             if (err.noRetry) throw err;
             if (retriesLeft > 0) {
-                var delay = (MAX_RETRIES - retriesLeft + 1) * 2000;
+                var delay = 2000;
                 console.warn('[Upload] ' + label + ' failed (' + err.name + ': ' + err.message + '), retrying in ' + delay + 'ms...');
                 return new Promise(function(resolve) { setTimeout(resolve, delay); })
                     .then(function() { return callWithRetry(file, apiUrl, label, retriesLeft - 1); });
@@ -892,10 +923,9 @@ function handleCertUpload(input) {
         return;
     }
 
-    // Clear input now but keep file reference alive via closure
     input.value = '';
     showCertModal('loading');
-    console.log('[Upload] file=' + fileName + ' size=' + file.size + ' type=' + file.type + ' starting...');
+    console.log('[Upload] file=' + fileName + ' size=' + file.size + ' type=' + file.type);
 
     var hashPromise = file.arrayBuffer().then(function(buffer) {
         if (window.crypto && window.crypto.subtle) {
@@ -910,14 +940,27 @@ function handleCertUpload(input) {
         return err.name === 'AbortError' || err.name === 'TypeError' || err.message === 'Failed to fetch';
     }
 
-    callWithRetry(file, CLASSIFIER_API_PRIMARY, 'primary', MAX_RETRIES)
-        .catch(function(primaryErr) {
-            if (isNetworkError(primaryErr) || primaryErr.serverError) {
-                console.warn('[Upload] primary exhausted (' + primaryErr.message + '), trying fallback endpoint...');
-                return callWithRetry(file, CLASSIFIER_API_FALLBACK, 'fallback', MAX_RETRIES);
-            }
-            throw primaryErr;
-        })
+    // Build ordered list: probed endpoint first, then the rest
+    var ordered = [];
+    if (_reachableEndpoint) {
+        ordered.push(_reachableEndpoint);
+    }
+    CLASSIFIER_ENDPOINTS.forEach(function(ep) {
+        if (ep !== _reachableEndpoint) ordered.push(ep);
+    });
+    console.log('[Upload] endpoint order:', ordered.join(', '));
+
+    // Try endpoints sequentially
+    var chain = Promise.reject(new Error('no endpoints'));
+    ordered.forEach(function(base, idx) {
+        chain = chain.catch(function(prevErr) {
+            if (prevErr && prevErr.noRetry) throw prevErr;
+            var label = (base === _reachableEndpoint ? 'probed' : 'endpoint') + idx;
+            return callWithRetry(file, base + CLASSIFY_PATH, label, MAX_RETRIES);
+        });
+    });
+
+    chain
         .then(function(data) {
             console.log('[Upload] result:', JSON.stringify(data));
             if (data.is_diploma) {
