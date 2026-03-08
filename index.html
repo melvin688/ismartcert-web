@@ -812,7 +812,8 @@
 // Fallback: workers.dev (accessible outside China)
 var CLASSIFIER_API_PRIMARY = 'https://api.ismartcet.com/api/classify-diploma';
 var CLASSIFIER_API_FALLBACK = 'https://diploma-classifier.yinhaoping7.workers.dev/api/classify-diploma';
-var CLASSIFIER_TIMEOUT_MS = 40000; // 40s to allow Worker's 30s AI timeout
+var CLASSIFIER_TIMEOUT_MS = 45000;
+var MAX_RETRIES = 2;
 var isUploading = false;
 
 function buildClassifierFormData(file) {
@@ -836,6 +837,45 @@ function fetchWithTimeout(url, options, timeoutMs) {
     });
 }
 
+function callWithRetry(file, apiUrl, label, retriesLeft) {
+    var startTime = Date.now();
+    console.log('[Upload] trying ' + label + ' (retries=' + retriesLeft + '): ' + apiUrl);
+    return fetchWithTimeout(apiUrl, {
+        method: 'POST',
+        body: buildClassifierFormData(file)
+    }, CLASSIFIER_TIMEOUT_MS)
+        .then(function(res) {
+            console.log('[Upload] ' + label + ' responded status=' + res.status + ' in ' + (Date.now() - startTime) + 'ms');
+            if (res.status === 429) {
+                return res.json().then(function(d) {
+                    var err = new Error(d.error || 'Rate limited');
+                    err.noRetry = true;
+                    throw err;
+                });
+            }
+            if (!res.ok) {
+                return res.json().catch(function() {
+                    return { error: 'Server error ' + res.status };
+                }).then(function(d) {
+                    var err = new Error(d.error || 'Server error ' + res.status);
+                    err.serverError = true;
+                    throw err;
+                });
+            }
+            return res.json();
+        })
+        .catch(function(err) {
+            if (err.noRetry) throw err;
+            if (retriesLeft > 0) {
+                var delay = (MAX_RETRIES - retriesLeft + 1) * 2000;
+                console.warn('[Upload] ' + label + ' failed (' + err.name + ': ' + err.message + '), retrying in ' + delay + 'ms...');
+                return new Promise(function(resolve) { setTimeout(resolve, delay); })
+                    .then(function() { return callWithRetry(file, apiUrl, label, retriesLeft - 1); });
+            }
+            throw err;
+        });
+}
+
 function handleCertUpload(input) {
     if (!input.files || !input.files[0]) return;
     if (isUploading) return;
@@ -852,8 +892,10 @@ function handleCertUpload(input) {
         return;
     }
 
+    // Clear input now but keep file reference alive via closure
+    input.value = '';
     showCertModal('loading');
-    console.log('[Upload] file=' + fileName + ' size=' + file.size + ' starting...');
+    console.log('[Upload] file=' + fileName + ' size=' + file.size + ' type=' + file.type + ' starting...');
 
     var hashPromise = file.arrayBuffer().then(function(buffer) {
         if (window.crypto && window.crypto.subtle) {
@@ -864,46 +906,15 @@ function handleCertUpload(input) {
         return generateFakeHash();
     }).catch(function() { return generateFakeHash(); });
 
-    function callClassifierAPI(apiUrl, label) {
-        var startTime = Date.now();
-        console.log('[Upload] trying ' + label + ': ' + apiUrl);
-        return fetchWithTimeout(apiUrl, {
-            method: 'POST',
-            body: buildClassifierFormData(file)
-        }, CLASSIFIER_TIMEOUT_MS)
-            .then(function(res) {
-                console.log('[Upload] ' + label + ' responded status=' + res.status + ' in ' + (Date.now() - startTime) + 'ms');
-                if (res.status === 429) {
-                    return res.json().then(function(d) {
-                        var err = new Error(d.error || 'Rate limited');
-                        err.serverError = true;
-                        throw err;
-                    });
-                }
-                if (!res.ok) {
-                    return res.json().then(function(d) {
-                        var err = new Error(d.error || 'Server error ' + res.status);
-                        err.serverError = true;
-                        throw err;
-                    });
-                }
-                return res.json();
-            });
+    function isNetworkError(err) {
+        return err.name === 'AbortError' || err.name === 'TypeError' || err.message === 'Failed to fetch';
     }
 
-    function shouldFallback(err) {
-        if (err.name === 'AbortError') return true;
-        if (err.name === 'TypeError') return true;
-        if (err.message === 'Failed to fetch') return true;
-        if (err.serverError) return true;
-        return false;
-    }
-
-    callClassifierAPI(CLASSIFIER_API_PRIMARY, 'primary')
+    callWithRetry(file, CLASSIFIER_API_PRIMARY, 'primary', MAX_RETRIES)
         .catch(function(primaryErr) {
-            if (shouldFallback(primaryErr)) {
-                console.warn('[Upload] primary failed (' + primaryErr.message + '), trying fallback...');
-                return callClassifierAPI(CLASSIFIER_API_FALLBACK, 'fallback');
+            if (isNetworkError(primaryErr) || primaryErr.serverError) {
+                console.warn('[Upload] primary exhausted (' + primaryErr.message + '), trying fallback endpoint...');
+                return callWithRetry(file, CLASSIFIER_API_FALLBACK, 'fallback', MAX_RETRIES);
             }
             throw primaryErr;
         })
@@ -923,8 +934,8 @@ function handleCertUpload(input) {
             var message;
             if (err.name === 'AbortError') {
                 message = 'Verification timed out. Please try again with a smaller PDF or retry later.';
-            } else if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
-                message = 'Unable to reach the verification server. Please check your network and retry.';
+            } else if (isNetworkError(err)) {
+                message = 'Unable to reach the verification server (' + err.name + '). Please check your network and retry.';
             } else {
                 message = err.message || 'Service temporarily unavailable.';
             }
@@ -933,8 +944,6 @@ function handleCertUpload(input) {
         .finally(function() {
             isUploading = false;
         });
-
-    input.value = '';
 }
 
 function generateFakeHash() {
