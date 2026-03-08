@@ -14,7 +14,7 @@
 import { PDFDocument } from "pdf-lib";
 
 // ── Constants ────────────────────────────────────────────────────────────────
-const MAX_PAGES = 3;
+const MAX_PAGES = 6;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const RATE_LIMIT_MS = 5000; // 5 seconds between Gemini API calls
 const AI_TIMEOUT_MS = 30000;
