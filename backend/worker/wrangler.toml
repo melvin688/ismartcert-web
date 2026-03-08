@@ -2,5 +2,10 @@ name = "diploma-classifier"
 main = "src/index.js"
 compatibility_date = "2024-12-01"
 
+# Custom domain for China mainland access (workers.dev is blocked)
+routes = [
+  { pattern = "api.ismartcet.com", custom_domain = true }
+]
+
 # GEMINI_API_KEY is stored as a secret via `wrangler secret put GEMINI_API_KEY`
 # Do NOT put the key here.
