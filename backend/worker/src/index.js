@@ -66,7 +66,8 @@ export default {
 
     const url = new URL(request.url);
 
-    if (url.pathname === "/" && request.method === "GET") {
+    // Health check — works on both / (api.ismartcet.com) and /api/health (ismartcet.com)
+    if ((url.pathname === "/" || url.pathname === "/api/health") && request.method === "GET") {
       return jsonResponse({ status: "ok", service: "diploma-classifier" });
     }
 
@@ -74,6 +75,7 @@ export default {
       return handleClassify(request, env);
     }
 
+    // For same-domain route: pass unmatched /api/* back with 404
     return jsonResponse({ error: "Not found" }, 404);
   },
 };

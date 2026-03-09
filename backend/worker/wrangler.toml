@@ -3,8 +3,11 @@ main = "src/index.js"
 compatibility_date = "2024-12-01"
 workers_dev = true
 
-# Custom domain for China mainland access (workers.dev is blocked)
+# Same-domain route: intercept /api/* on the main site so frontend uses
+# relative paths — no CORS, no cross-origin, works if the page loads.
+# Also keep api.ismartcet.com as a direct endpoint for external callers.
 routes = [
+  { pattern = "ismartcet.com/api/*", zone_name = "ismartcet.com" },
   { pattern = "api.ismartcet.com", custom_domain = true }
 ]
 

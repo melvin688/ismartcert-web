@@ -808,23 +808,13 @@
 }
 </style>
 <script type="text/javascript">
-// Endpoints — probe both at page load, use whichever responds first
-var CLASSIFIER_ENDPOINTS = [
-    'https://api.ismartcet.com',
-    'https://diploma-classifier.yinhaoping7.workers.dev'
-];
-var CLASSIFY_PATH = '/api/classify-diploma';
+// ── Same-origin API ──────────────────────────────────────────────────────────
+// The Worker is mounted at ismartcet.com/api/* via Cloudflare route,
+// so we use a relative path — same domain, no CORS, no cross-origin issues.
+// If the page loads, the API is guaranteed reachable.
+var CLASSIFY_API = '/api/classify-diploma';
 var CLASSIFIER_TIMEOUT_MS = 45000;
-var PROBE_TIMEOUT_MS = 5000;
-var MAX_RETRIES = 1;
 var isUploading = false;
-var _reachableEndpoint = null; // cached after probe
-
-function buildClassifierFormData(file) {
-    var formData = new FormData();
-    formData.append('file', file);
-    return formData;
-}
 
 function fetchWithTimeout(url, options, timeoutMs) {
     var controller = new AbortController();
@@ -839,72 +829,6 @@ function fetchWithTimeout(url, options, timeoutMs) {
     }).finally(function() {
         clearTimeout(timer);
     });
-}
-
-// Probe endpoints: race them, first 200 wins
-function probeEndpoints() {
-    console.log('[Probe] testing endpoints...');
-    return Promise.any(
-        CLASSIFIER_ENDPOINTS.map(function(base) {
-            var c = new AbortController();
-            var t = setTimeout(function() { c.abort(); }, PROBE_TIMEOUT_MS);
-            return fetch(base + '/', { method: 'GET', signal: c.signal, mode: 'cors' })
-                .then(function(res) {
-                    clearTimeout(t);
-                    if (res.ok) {
-                        console.log('[Probe] reachable: ' + base);
-                        return base;
-                    }
-                    throw new Error('status ' + res.status);
-                })
-                .catch(function(err) { clearTimeout(t); throw err; });
-        })
-    ).catch(function() {
-        console.warn('[Probe] no endpoint reachable, will try all on upload');
-        return null;
-    });
-}
-
-// Run probe at page load
-probeEndpoints().then(function(base) { _reachableEndpoint = base; });
-
-function callWithRetry(file, apiUrl, label, retriesLeft) {
-    var startTime = Date.now();
-    console.log('[Upload] trying ' + label + ' (retries=' + retriesLeft + '): ' + apiUrl);
-    return fetchWithTimeout(apiUrl, {
-        method: 'POST',
-        body: buildClassifierFormData(file)
-    }, CLASSIFIER_TIMEOUT_MS)
-        .then(function(res) {
-            console.log('[Upload] ' + label + ' responded status=' + res.status + ' in ' + (Date.now() - startTime) + 'ms');
-            if (res.status === 429) {
-                return res.json().then(function(d) {
-                    var err = new Error(d.error || 'Rate limited');
-                    err.noRetry = true;
-                    throw err;
-                });
-            }
-            if (!res.ok) {
-                return res.json().catch(function() {
-                    return { error: 'Server error ' + res.status };
-                }).then(function(d) {
-                    var err = new Error(d.error || 'Server error ' + res.status);
-                    err.serverError = true;
-                    throw err;
-                });
-            }
-            return res.json();
-        })
-        .catch(function(err) {
-            if (err.noRetry) throw err;
-            if (retriesLeft > 0) {
-                var delay = 2000;
-                console.warn('[Upload] ' + label + ' failed (' + err.name + ': ' + err.message + '), retrying in ' + delay + 'ms...');
-                return new Promise(function(resolve) { setTimeout(resolve, delay); })
-                    .then(function() { return callWithRetry(file, apiUrl, label, retriesLeft - 1); });
-            }
-            throw err;
-        });
 }
 
 function handleCertUpload(input) {
@@ -925,7 +849,7 @@ function handleCertUpload(input) {
 
     input.value = '';
     showCertModal('loading');
-    console.log('[Upload] file=' + fileName + ' size=' + file.size + ' type=' + file.type);
+    console.log('[Upload] file=' + fileName + ' size=' + file.size);
 
     var hashPromise = file.arrayBuffer().then(function(buffer) {
         if (window.crypto && window.crypto.subtle) {
@@ -936,31 +860,25 @@ function handleCertUpload(input) {
         return generateFakeHash();
     }).catch(function() { return generateFakeHash(); });
 
-    function isNetworkError(err) {
-        return err.name === 'AbortError' || err.name === 'TypeError' || err.message === 'Failed to fetch';
-    }
+    var formData = new FormData();
+    formData.append('file', file);
 
-    // Build ordered list: probed endpoint first, then the rest
-    var ordered = [];
-    if (_reachableEndpoint) {
-        ordered.push(_reachableEndpoint);
-    }
-    CLASSIFIER_ENDPOINTS.forEach(function(ep) {
-        if (ep !== _reachableEndpoint) ordered.push(ep);
-    });
-    console.log('[Upload] endpoint order:', ordered.join(', '));
+    var startTime = Date.now();
+    console.log('[Upload] POST ' + CLASSIFY_API);
 
-    // Try endpoints sequentially
-    var chain = Promise.reject(new Error('no endpoints'));
-    ordered.forEach(function(base, idx) {
-        chain = chain.catch(function(prevErr) {
-            if (prevErr && prevErr.noRetry) throw prevErr;
-            var label = (base === _reachableEndpoint ? 'probed' : 'endpoint') + idx;
-            return callWithRetry(file, base + CLASSIFY_PATH, label, MAX_RETRIES);
-        });
-    });
-
-    chain
+    fetchWithTimeout(CLASSIFY_API, { method: 'POST', body: formData }, CLASSIFIER_TIMEOUT_MS)
+        .then(function(res) {
+            console.log('[Upload] status=' + res.status + ' in ' + (Date.now() - startTime) + 'ms');
+            if (res.status === 429) {
+                return res.json().then(function(d) { throw new Error(d.error || 'Rate limited'); });
+            }
+            if (!res.ok) {
+                return res.json().catch(function() {
+                    return { error: 'Server error ' + res.status };
+                }).then(function(d) { throw new Error(d.error || 'Server error'); });
+            }
+            return res.json();
+        })
         .then(function(data) {
             console.log('[Upload] result:', JSON.stringify(data));
             if (data.is_diploma) {
@@ -973,12 +891,10 @@ function handleCertUpload(input) {
             }
         })
         .catch(function(err) {
-            console.error('[Upload] final error:', err.name, err.message);
+            console.error('[Upload] error:', err.name, err.message);
             var message;
             if (err.name === 'AbortError') {
                 message = 'Verification timed out. Please try again with a smaller PDF or retry later.';
-            } else if (isNetworkError(err)) {
-                message = 'Unable to reach the verification server (' + err.name + '). Please check your network and retry.';
             } else {
                 message = err.message || 'Service temporarily unavailable.';
             }
